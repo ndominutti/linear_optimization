@@ -95,7 +95,8 @@ def get_instance_data():
     return instance
     
 
-def add_constraint_matrix(my_problem, data, A, X, E, F, Delta):
+def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
+                          WH1, WH2, WH3, WH4, S1, S2, S3):
     
     # Restriccion 1
     for o in range(data.cantidad_ordenes):
@@ -216,6 +217,59 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta):
                 lhs.add(data.trabajadores_necesarios[o]) #To
             my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=0)
 
+    # Restriccion 7
+    ...
+
+    # Restriccion 8
+    ...
+
+    # Restriccion 9
+    ...
+
+    # Restriccion 10
+    ...
+
+    #Restricciones función objetivo
+    # Restriccion 1
+    for t in range(data.cantidad_trabajadores):
+        #WH1
+        lhs = cplex.SparsePair()
+        lhs.add([S1[t],WH1[t]], [5.0,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+
+        #WH2
+        lhs = cplex.SparsePair()
+        lhs.add([S2[t],WH2[t]], [5.0,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+
+        lhs = cplex.SparsePair()
+        lhs.add([WH2[t],S1[t]], [1,-5.0])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+
+        #WH3
+        lhs = cplex.SparsePair()
+        lhs.add([S3[t],WH3[t]], [5.0,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+
+        lhs = cplex.SparsePair()
+        lhs.add([WH3[t],S2[t]], [1,-5.0])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+
+        #WH4
+        lhs = cplex.SparsePair()
+        lhs.add([WH4[t],S3[t]], [1,-6.0])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+
+        #S1>=S2
+        lhs = cplex.SparsePair()
+        lhs.add([S1[t],S2[t]], [1,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=0)
+
+        #S2>=S3
+        lhs = cplex.SparsePair()
+        lhs.add([S2[t],S3[t]], [1,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=0)
+
 
 def add_variables(my_problem, data):
     # Variables binarias que representan a Ao y, al agregarle el beneficio de la orden
@@ -271,13 +325,55 @@ def add_variables(my_problem, data):
                                          types=['B'],
                                          names=[f'Delta_{o}_{h}_{d}']
                                          ) 
-                
-    return A, X, E, F, Delta
+    
+    WH1, WH2, WH3, WH4, S1, S2, S3 = {},{},{},{},{},{},{}      
+    for t in range(data.cantidad_trabajadores):
+        S1[t] = my_problem.variables.add(lb = [0], 
+                                         ub = [1], 
+                                         types=['B'],
+                                         names=[f'WH1_{t}']
+                                         )
+        S2[t] = my_problem.variables.add(lb = [0], 
+                                         ub = [1], 
+                                         types=['B'],
+                                         names=[f'WH1_{t}']
+                                         )
+        S3[t] = my_problem.variables.add(lb = [0], 
+                                         ub = [1], 
+                                         types=['B'],
+                                         names=[f'WH1_{t}']
+                                         )
+        WH1[t] = my_problem.variables.add(obj = 1000,
+                                         lb = [0], 
+                                         ub = [5], 
+                                         types=['I'],
+                                         names=[f'WH1_{t}']
+                                         ) 
+        WH2[t] = my_problem.variables.add(obj = 1200,
+                                         lb = [0], 
+                                         ub = [5], 
+                                         types=['I'],
+                                         names=[f'WH1_{t}']
+                                         ) 
+        WH3[t] = my_problem.variables.add(obj = 1400,
+                                         lb = [0], 
+                                         ub = [5], 
+                                         types=['I'],
+                                         names=[f'WH1_{t}']
+                                         ) 
+        WH4[t] = my_problem.variables.add(obj = 1500,
+                                         lb = [0], 
+                                         ub = [6], 
+                                         types=['I'],
+                                         names=[f'WH1_{t}']
+                                         )
+
+    return A, X, E, F, Delta, WH1, WH2, WH3, WH4, S1, S2, S3
 
 
 def populate_by_row(my_problem, data):
 
-    A, X, E, F, Delta = add_variables(my_problem, data)
+    A, X, E, F, Delta, WH1, WH2, WH3, WH4, S1, S2, S3 = add_variables(my_problem, data)
 
     # Seteamos direccion del problema
     # ~ my_problem.objective.set_sense(my_problem.objective.sense.maximize)
