@@ -104,9 +104,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             for d in range(data.cantidad_dias):
                 lhs = cplex.SparsePair()
                 for t in range(data.cantidad_trabajadores):
-                    lhs.add(X[(t, o, h, d)], 1.0)
-                lhs.add(Delta[(o, h, d)], -1.0)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=0)
+                    lhs.ind.append(X[(t, o, h, d)])
+                    lhs.val.append(1)
+                lhs.ind.append(Delta[(o, h, d)])
+                lhs.val.append(-1)
+                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
 
     # Restriccion 2
     for o in range(data.cantidad_ordenes):
@@ -114,19 +116,23 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             for d in range(data.cantidad_dias):
                 lhs = cplex.SparsePair()
                 for t in range(data.cantidad_trabajadores):
-                    lhs.add(X[(t, o, h, d)], 1.0)
-                lhs.add(Delta[(o, h, d)], -data.M)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+                    lhs.ind.append(X[(t, o, h, d)])
+                    lhs.val.append(1)
+                lhs.ind.append(Delta[(o, h, d)])
+                lhs.val.append(-data.M)
+                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
     # Restriccion 3
     for o in range(data.cantidad_ordenes):
         lhs = cplex.SparsePair()
         for h in range(data.cantidad_turnos):
             for d in range(data.cantidad_dias):
-                for t in range(data.cantidad_trabajadores):
-                    lhs.add(X[(t, o, h, d)], 1.0)
-        lhs.add(A[o], -1)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+                #for t in range(data.cantidad_trabajadores):
+                lhs.ind.append(Delta[(o, h, d)])
+                lhs.val.append(1)
+        lhs.ind.append(A[o])
+        lhs.val.append(-1)
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
     # Restriccion 4
     for d in range(data.cantidad_dias):
@@ -134,9 +140,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             lhs = cplex.SparsePair()
             for o in range(data.cantidad_ordenes):
                 for h in range(data.cantidad_turnos):
-                    lhs.add(X[(t, o, h, d)], 1.0)
-            lhs.add(E[(d,t)], -1)
-            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=0)
+                    lhs.ind.append(X[(t, o, h, d)])
+                    lhs.val.append(1)
+            lhs.ind.append(E[(t,d)])
+            lhs.val.append(-1)
+            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
         
     # Restriccion 5
     for d in range(data.cantidad_dias):
@@ -144,9 +152,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             lhs = cplex.SparsePair()
             for o in range(data.cantidad_ordenes):
                 for h in range(data.cantidad_turnos):
-                    lhs.add(X[(t, o, h, d)], 1.0)
-            lhs.add(E[(t,d)], -data.M)
-            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+                    lhs.ind.append(X[(t, o, h, d)])
+                    lhs.val.append(1)
+            lhs.ind.append(E[(t,d)])
+            lhs.val.append(-data.M)
+            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
     # Restriccion 6
     for d in range(data.cantidad_dias):
@@ -154,9 +164,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             for h in range(data.cantidad_turnos):
                 lhs = cplex.SparsePair()
                 for o in range(data.cantidad_ordenes):
-                    lhs.add(X[(t, o, h, d)], 1.0)
-                lhs.add(F[(t,h,d)], -1)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=0)
+                    lhs.ind.append(X[(t, o, h, d)])
+                    lhs.val.append(1)
+                lhs.ind.append(F[(t,h,d)])
+                lhs.val.append(-1)
+                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
 
     # Restriccion 7
     for d in range(data.cantidad_dias):
@@ -164,9 +176,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             for h in range(data.cantidad_turnos):
                 lhs = cplex.SparsePair()
                 for o in range(data.cantidad_ordenes):
-                    lhs.add(X[(t, o, h, d)], 1.0)
-                lhs.add(F[(t,h,d)], -data.M)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+                    lhs.ind.append(X[(t, o, h, d)])
+                    lhs.val.append(1)
+                lhs.ind.append(F[(t,h,d)])
+                lhs.val.append(-data.M)
+                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
     #----------------- RESTRICCIONES DEL PROBLEMA
     # Restriccion 1
@@ -174,8 +188,9 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
         lhs = cplex.SparsePair()
         for d in range(data.cantidad_dias):
             for h in range(data.cantidad_turnos):
-                lhs.add(Delta[(o, h, d)], 1.0)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=1)
+                lhs.ind.append(Delta[(o, h, d)])
+                lhs.val.append(1)
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[1])
 
     # Restriccion 2
     for t in range(data.cantidad_trabajadores):    
@@ -183,23 +198,26 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             for h in range(data.cantidad_turnos):
                 lhs = cplex.SparsePair()
                 for o in range(data.cantidad_ordenes):
-                    lhs.add(X[(t, o, h, d)], 1.0)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=1)
+                    lhs.ind.append(X[(t, o, h, d)])
+                    lhs.val.append(1)
+                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[1])
 
     # Restriccion 3
     for t in range(data.cantidad_trabajadores):  
         lhs = cplex.SparsePair()  
         for d in range(data.cantidad_dias):
-            lhs.add(E[(d,t)], 1.0)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=5)
+            lhs.ind.append(E[(t,d)])
+            lhs.val.append(1)
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[5])
 
     # Restriccion 4
     for t in range(data.cantidad_trabajadores):  
         for d in range(data.cantidad_dias):
             lhs = cplex.SparsePair()  
             for h in range(data.cantidad_turnos):
-                lhs.add(F[(t,h,d)], 1.0)
-            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=4)
+                lhs.ind.append(F[(t,h,d)])
+                lhs.val.append(1)
+            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[4])
     
     # Restriccion 5
     ...
@@ -210,12 +228,16 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             for o in range(data.cantidad_ordenes):
                 lhs = cplex.SparsePair() 
                 for t in range(data.cantidad_trabajadores):  
-                    lhs.add(X[(t, o, h, d)], 1.0)
+                    lhs.ind.append(X[(t, o, h, d)])
+                    lhs.val.append(1)
                 #Aplicamos distributiva a (1-delta)*M
-                lhs.add_constant(data.M)
-                lhs.add(Delta[o, h, d], -data.M)
-                lhs.add(data.trabajadores_necesarios[o]) #To
-            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=0)
+                lhs.ind.append('AUX_CONSTANT1')
+                lhs.val.append(data.M)
+                lhs.ind.append(Delta[(o, h, d)])
+                lhs.val.append(-data.M)
+                lhs.ind.append('AUX_CONSTANT2')
+                lhs.val.append(data.ordenes[o].trabajadores_necesarios)#To
+                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
 
     # Restriccion 7
     ...
@@ -230,59 +252,62 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
     ...
 
     #Restricciones función objetivo
-    # Restriccion 1
     for t in range(data.cantidad_trabajadores):
         #WH1
-        lhs = cplex.SparsePair()
-        lhs.add([S1[t],WH1[t]], [5.0,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+        lhs = cplex.SparsePair([S1[t],WH1[t]], [5.0,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
         #WH2
-        lhs = cplex.SparsePair()
-        lhs.add([S2[t],WH2[t]], [5.0,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+        lhs = cplex.SparsePair([S2[t],WH2[t]], [5.0,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
-        lhs = cplex.SparsePair()
-        lhs.add([WH2[t],S1[t]], [1,-5.0])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+        lhs = cplex.SparsePair([WH2[t],S1[t]], [1,-5.0])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
         #WH3
-        lhs = cplex.SparsePair()
-        lhs.add([S3[t],WH3[t]], [5.0,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+        lhs = cplex.SparsePair([S3[t],WH3[t]], [5.0,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
-        lhs = cplex.SparsePair()
-        lhs.add([WH3[t],S2[t]], [1,-5.0])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+        lhs = cplex.SparsePair([WH3[t],S2[t]], [1,-5.0])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
         #WH4
-        lhs = cplex.SparsePair()
-        lhs.add([WH4[t],S3[t]], [1,-6.0])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=0)
+        lhs = cplex.SparsePair([WH4[t],S3[t]], [1,-6.0])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
 
         #S1>=S2
-        lhs = cplex.SparsePair()
-        lhs.add([S1[t],S2[t]], [1,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=0)
+        lhs = cplex.SparsePair([S1[t],S2[t]], [1,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
 
         #S2>=S3
-        lhs = cplex.SparsePair()
-        lhs.add([S2[t],S3[t]], [1,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=0)
+        lhs = cplex.SparsePair([S2[t],S3[t]], [1,-1])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
 
 
 def add_variables(my_problem, data):
+    #Constante necesaria para las restricciones
+    my_problem.variables.add(lb = [1], 
+                             ub = [1], 
+                             types=['B'],
+                             names=['AUX_CONSTANT1']
+                             )
+    my_problem.variables.add(lb = [1], 
+                             ub = [1], 
+                             types=['B'],
+                             names=['AUX_CONSTANT2']
+                             )
     # Variables binarias que representan a Ao y, al agregarle el beneficio de la orden
     # como peso en la función objetivo, también representa a SUM(Bo*Ao)
     i=0
     A = {}
     for orden in data.ordenes:
-        A[i] = my_problem.variables.add(obj = orden.beneficio, 
+        my_problem.variables.add(obj = [orden.beneficio], 
                                 lb = [0], 
                                 ub = [1], 
                                 types=['B'],
                                 names=[f'A_{i}']
                                 )
+        A[i] = f'A_{i}'
         i+=1
     
     X = {}
@@ -290,82 +315,93 @@ def add_variables(my_problem, data):
         for o in range(data.cantidad_ordenes):
             for h in range(data.cantidad_turnos):
                 for d in range(data.cantidad_dias):
-                    X[(t,o,h,d)] = my_problem.variables.add(lb = [0], 
+                    my_problem.variables.add(lb = [0], 
                                             ub = [1], 
                                             types=['B'],
-                                            names=[f'X_{t}_{o}_{h}_{d}']
+                                            names=[f"X_{t}_{o}_{h}_{d}"]
                                             )
+                    X[(t,o,h,d)] = f"X_{t}_{o}_{h}_{d}"
     
     E = {}
     for t in range(data.cantidad_trabajadores):
         for d in range(data.cantidad_dias):
-            E[(t,d)] = my_problem.variables.add(lb = [0], 
+            my_problem.variables.add(lb = [0], 
                                     ub = [1], 
                                     types=['B'],
                                     names=[f'E_{t}_{d}']
                                     )
+            E[(t,d)] = f'E_{t}_{d}'
     
     F = {}
     for t in range(data.cantidad_trabajadores):
         for h in range(data.cantidad_turnos):
             for d in range(data.cantidad_dias):
-                F[(t,h,d)] = my_problem.variables.add(lb = [0], 
+                my_problem.variables.add(lb = [0], 
                                          ub = [1], 
                                          types=['B'],
                                          names=[f'F_{t}_{h}_{d}']
                                          )
+                F[(t,h,d)] = f'F_{t}_{h}_{d}'
     
     Delta = {}
     for o in range(data.cantidad_ordenes):
         for h in range(data.cantidad_turnos):
             for d in range(data.cantidad_dias):
-                Delta[(o,h,d)] = my_problem.variables.add(lb = [0], 
+                my_problem.variables.add(lb = [0], 
                                          ub = [1], 
                                          types=['B'],
                                          names=[f'Delta_{o}_{h}_{d}']
                                          ) 
+                Delta[(o,h,d)] = f'Delta_{o}_{h}_{d}'
     
     WH1, WH2, WH3, WH4, S1, S2, S3 = {},{},{},{},{},{},{}      
     for t in range(data.cantidad_trabajadores):
-        S1[t] = my_problem.variables.add(lb = [0], 
+        my_problem.variables.add(lb = [0], 
                                          ub = [1], 
                                          types=['B'],
-                                         names=[f'WH1_{t}']
+                                         names=[f'S1_{t}']
                                          )
-        S2[t] = my_problem.variables.add(lb = [0], 
+        S1[t] = f'S1_{t}'
+        my_problem.variables.add(lb = [0], 
                                          ub = [1], 
                                          types=['B'],
-                                         names=[f'WH1_{t}']
+                                         names=[f'S2_{t}']
                                          )
-        S3[t] = my_problem.variables.add(lb = [0], 
+        S2[t] = f'S2_{t}'
+        my_problem.variables.add(lb = [0], 
                                          ub = [1], 
                                          types=['B'],
-                                         names=[f'WH1_{t}']
+                                         names=[f'S3_{t}']
                                          )
-        WH1[t] = my_problem.variables.add(obj = 1000,
+        S3[t] = f'S3_{t}'
+        my_problem.variables.add(obj = [-1000],
                                          lb = [0], 
                                          ub = [5], 
                                          types=['I'],
                                          names=[f'WH1_{t}']
                                          ) 
-        WH2[t] = my_problem.variables.add(obj = 1200,
+        WH1[t] = f'WH1_{t}'
+        my_problem.variables.add(obj = [-1200],
                                          lb = [0], 
                                          ub = [5], 
                                          types=['I'],
-                                         names=[f'WH1_{t}']
+                                         names=[f'WH2_{t}']
                                          ) 
-        WH3[t] = my_problem.variables.add(obj = 1400,
+        WH2[t] = f'WH2_{t}'
+        my_problem.variables.add(obj = [-1400],
                                          lb = [0], 
                                          ub = [5], 
                                          types=['I'],
-                                         names=[f'WH1_{t}']
+                                         names=[f'WH3_{t}']
                                          ) 
-        WH4[t] = my_problem.variables.add(obj = 1500,
+        WH3[t] = f'WH3_{t}'
+        my_problem.variables.add(obj = [-1500],
                                          lb = [0], 
                                          ub = [6], 
                                          types=['I'],
-                                         names=[f'WH1_{t}']
+                                         names=[f'WH4_{t}']
                                          )
+        WH4[t] = f'WH4_{t}'
 
     return A, X, E, F, Delta, WH1, WH2, WH3, WH4, S1, S2, S3
 
@@ -379,7 +415,7 @@ def populate_by_row(my_problem, data):
     # ~ my_problem.objective.set_sense(my_problem.objective.sense.minimize)
 
     # Definimos las restricciones del modelo. Encapsulamos esto en una funcion. 
-    add_constraint_matrix(my_problem, data, A, X, E, F, Delta)
+    add_constraint_matrix(my_problem, data, A, X, E, F, Delta, WH1, WH2, WH3, WH4, S1, S2, S3)
 
     # Exportamos el LP cargado en myprob con formato .lp. 
     # Util para debug.
@@ -393,6 +429,7 @@ def solve_lp(my_problem, data):
 
     # Obtenemos informacion de la solucion. Esto lo hacemos a traves de 'solution'. 
     x_variables = my_problem.solution.get_values()
+    variables_name = my_problem.variables.get_names()
     objective_value = my_problem.solution.get_objective_value()
     status = my_problem.solution.get_status()
     status_string = my_problem.solution.get_status_string(status_code = status)
@@ -404,7 +441,7 @@ def solve_lp(my_problem, data):
     for i in range(len(x_variables)):
         # Tomamos esto como valor de tolerancia, por cuestiones numericas.
         if x_variables[i] > TOLERANCE:
-            print('x_' + str(data.items[i].index) + ':' , x_variables[i])
+            print(variables_name[i] + ':' , x_variables[i])
 
 def main():
     
