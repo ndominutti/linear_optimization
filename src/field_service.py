@@ -274,7 +274,6 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
 def add_variables(my_problem, data):
     # Variables binarias que representan a Ao y, al agregarle el beneficio de la orden
     # como peso en la función objetivo, también representa a SUM(Bo*Ao)
-
     i=0
     A = {}
     for orden in data.ordenes:
@@ -376,7 +375,7 @@ def populate_by_row(my_problem, data):
     A, X, E, F, Delta, WH1, WH2, WH3, WH4, S1, S2, S3 = add_variables(my_problem, data)
 
     # Seteamos direccion del problema
-    # ~ my_problem.objective.set_sense(my_problem.objective.sense.maximize)
+    my_problem.objective.set_sense(my_problem.objective.sense.maximize)
     # ~ my_problem.objective.set_sense(my_problem.objective.sense.minimize)
 
     # Definimos las restricciones del modelo. Encapsulamos esto en una funcion. 
