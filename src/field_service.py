@@ -1,5 +1,6 @@
 import sys
 import cplex
+import json
 
 TOLERANCE =10e-6 
 
@@ -127,12 +128,12 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
         lhs = cplex.SparsePair()
         for h in range(data.cantidad_turnos):
             for d in range(data.cantidad_dias):
-                #for t in range(data.cantidad_trabajadores):
-                lhs.ind.append(Delta[(o, h, d)])
-                lhs.val.append(1)
+                for t in range(data.cantidad_trabajadores):
+                    lhs.ind.append(X[(t,o, h, d)])
+                    lhs.val.append(1)
         lhs.ind.append(A[o])
         lhs.val.append(-1)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
 
     # Restriccion 4
     for d in range(data.cantidad_dias):
@@ -220,8 +221,22 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[4])
     
     # Restriccion 5
-    ...
-
+    for (o1, o2) in data.ordenes_conflictivas:
+        for h in range(data.cantidad_turnos):
+            if h<4:
+                for t in range(data.cantidad_trabajadores):    
+                    for d in range(data.cantidad_dias):
+                        lhs = cplex.SparsePair()
+                        lhs.ind.append(X[(t, o1, h, d)])
+                        lhs.val.append(1)
+                        lhs.ind.append(X[(t, o2, h+1, d)])
+                        lhs.val.append(1)
+                        lhs.ind.append(X[(t, o2, h, d)])
+                        lhs.val.append(1)
+                        lhs.ind.append(X[(t, o1, h+1, d)])
+                        lhs.val.append(1)
+                        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[1])
+        
     # Restriccion 6
     for d in range(data.cantidad_dias):
         for h in range(data.cantidad_turnos):
@@ -236,20 +251,52 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                 lhs.ind.append(Delta[(o, h, d)])
                 lhs.val.append(-data.M)
                 lhs.ind.append('AUX_CONSTANT2')
-                lhs.val.append(data.ordenes[o].trabajadores_necesarios)#To
+                lhs.val.append(-data.ordenes[o].trabajadores_necesarios)#To
                 my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
 
     # Restriccion 7
-    ...
+    for (o1, o2) in data.ordenes_correlativas:
+        lhs_lesser = cplex.SparsePair() 
+        lhs_greater = cplex.SparsePair() 
+        for h in range(data.cantidad_turnos):
+            if h<4:
+                for d in range(data.cantidad_dias):
+                    lhs_lesser.ind.append(Delta[(o1, h, d)])
+                    lhs_lesser.val.append(1)
+                    lhs_lesser.ind.append(Delta[(o2, h+1, d)])
+                    lhs_lesser.val.append(-1)
+                    lhs_greater.ind.append(Delta[(o1, h, d)])
+                    lhs_greater.val.append(1)
+                    lhs_greater.ind.append(Delta[(o2, h+1, d)])
+                    lhs_greater.val.append(-1)
+                    my_problem.linear_constraints.add(lin_expr=[lhs_lesser], senses=['L'], rhs=[0])
+                    my_problem.linear_constraints.add(lin_expr=[lhs_greater], senses=['G'], rhs=[0])
 
-    # Restriccion 8
-    ...
-
-    # Restriccion 9
-    ...
+    # Restriccion 8 y 9
+    for t in range(data.cantidad_trabajadores):  
+        lhs_max = cplex.SparsePair()
+        lhs_min = cplex.SparsePair()
+        for d in range(data.cantidad_dias):
+            for h in range(data.cantidad_turnos):
+                for o in range(data.cantidad_ordenes):
+                    lhs_max.ind.append(X[(t, o, h, d)])
+                    lhs_max.val.append(1)
+                    lhs_min.ind.append(X[(t, o, h, d)])
+                    lhs_min.val.append(1)
+        lhs_max.ind.append('MAX_ORDERS')
+        lhs_max.val.append(-1)
+        lhs_min.ind.append('MIN_ORDERS')
+        lhs_min.val.append(-1)
+        my_problem.linear_constraints.add(lin_expr=[lhs_max], senses=['L'], rhs=[0])
+        my_problem.linear_constraints.add(lin_expr=[lhs_min], senses=['G'], rhs=[0])
 
     # Restriccion 10
-    ...
+    lhs = cplex.SparsePair()
+    lhs.ind.append('MAX_ORDERS')
+    lhs.val.append(1)
+    lhs.ind.append('MIN_ORDERS')
+    lhs.val.append(-1)
+    my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[10])
 
     #Restricciones función objetivo
     for t in range(data.cantidad_trabajadores):
@@ -283,9 +330,26 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
         lhs = cplex.SparsePair([S2[t],S3[t]], [1,-1])
         my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
 
+        #Link
+        lhs = cplex.SparsePair()
+        lhs.ind.append(WH1[t])
+        lhs.val.append(1)
+        lhs.ind.append(WH2[t])
+        lhs.val.append(1)
+        lhs.ind.append(WH3[t])
+        lhs.val.append(1)
+        lhs.ind.append(WH4[t])
+        lhs.val.append(1)
+        for o in range(data.cantidad_ordenes):
+            for h in range(data.cantidad_turnos):
+                for d in range(data.cantidad_dias):
+                    lhs.ind.append(X[(t, o, h, d)])
+                    lhs.val.append(-1)        
+        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+
 
 def add_variables(my_problem, data):
-    #Constante necesaria para las restricciones
+    #Constantes necesarias para las restricciones
     my_problem.variables.add(lb = [1], 
                              ub = [1], 
                              types=['B'],
@@ -316,10 +380,10 @@ def add_variables(my_problem, data):
             for h in range(data.cantidad_turnos):
                 for d in range(data.cantidad_dias):
                     my_problem.variables.add(lb = [0], 
-                                            ub = [1], 
-                                            types=['B'],
-                                            names=[f"X_{t}_{o}_{h}_{d}"]
-                                            )
+                                             ub = [1], 
+                                             types=['B'],
+                                             names=[f"X_{t}_{o}_{h}_{d}"]
+                                             )
                     X[(t,o,h,d)] = f"X_{t}_{o}_{h}_{d}"
     
     E = {}
@@ -403,6 +467,18 @@ def add_variables(my_problem, data):
                                          )
         WH4[t] = f'WH4_{t}'
 
+
+    #Variables MIN Y MAX de órdenes
+    my_problem.variables.add(lb = [1], 
+                             ub = [data.cantidad_ordenes], 
+                             types=['I'],
+                             names=['MAX_ORDERS']
+                             )
+    my_problem.variables.add(lb = [1], 
+                             ub = [data.cantidad_ordenes], 
+                             types=['I'],
+                             names=['MIN_ORDERS']
+                             )
     return A, X, E, F, Delta, WH1, WH2, WH3, WH4, S1, S2, S3
 
 
@@ -437,11 +513,25 @@ def solve_lp(my_problem, data):
     print('Funcion objetivo: ',objective_value)
     print('Status solucion: ',status_string,'(' + str(status) + ')')
 
-    # Imprimimos las variables usadas.
+    status_json = {
+        'A':{'VAR':[],'VAL':[]},
+        'X':{'VAR':[],'VAL':[]},
+        'D':{'VAR':[],'VAL':[]},
+        'E':{'VAR':[],'VAL':[]},
+        'F':{'VAR':[],'VAL':[]},
+        'S':{'VAR':[],'VAL':[]},
+        'W':{'VAR':[],'VAL':[]},
+        'M':{'VAR':[],'VAL':[]},
+    }
+        # Imprimimos las variables usadas.
     for i in range(len(x_variables)):
         # Tomamos esto como valor de tolerancia, por cuestiones numericas.
         if x_variables[i] > TOLERANCE:
             print(variables_name[i] + ':' , x_variables[i])
+            status_json[variables_name[i][0]]['VAR'].append(variables_name[i])
+            status_json[variables_name[i][0]]['VAL'].append(x_variables[i])
+    with open('status.json', 'w') as json_file:
+        json.dump(status_json, json_file)
 
 def main():
     
