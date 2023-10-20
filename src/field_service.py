@@ -100,6 +100,7 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                           WH1, WH2, WH3, WH4, S1, S2, S3, zMAX, zMIN):
     
     # Restriccion 1
+    restriccion = []
     for o in range(data.cantidad_ordenes):
         for h in range(data.cantidad_turnos):
             for d in range(data.cantidad_dias):
@@ -109,9 +110,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                     lhs.val.append(1)
                 lhs.ind.append(Delta[(o, h, d)])
                 lhs.val.append(-1)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+                restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['G']*len(restriccion), rhs=[0]*len(restriccion))
 
     # Restriccion 2
+    restriccion = []
     for o in range(data.cantidad_ordenes):
         for h in range(data.cantidad_turnos):
             for d in range(data.cantidad_dias):
@@ -121,9 +124,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                     lhs.val.append(1)
                 lhs.ind.append(Delta[(o, h, d)])
                 lhs.val.append(-data.M)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+                restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['L']*len(restriccion), rhs=[0]*len(restriccion))
 
     # Restriccion 3
+    restriccion = []
     for o in range(data.cantidad_ordenes):
         lhs = cplex.SparsePair()
         for h in range(data.cantidad_turnos):
@@ -133,9 +138,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                     lhs.val.append(1)
         lhs.ind.append(A[o])
         lhs.val.append(-1)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+        restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['G']*len(restriccion), rhs=[0]*len(restriccion))
 
     # Restriccion 4
+    restriccion = []
     for d in range(data.cantidad_dias):
         for t in range(data.cantidad_trabajadores):
             lhs = cplex.SparsePair()
@@ -145,9 +152,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                     lhs.val.append(1)
             lhs.ind.append(E[(t,d)])
             lhs.val.append(-1)
-            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+            restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['G']*len(restriccion), rhs=[0]*len(restriccion))
         
     # Restriccion 5
+    restriccion = []
     for d in range(data.cantidad_dias):
         for t in range(data.cantidad_trabajadores):
             lhs = cplex.SparsePair()
@@ -157,9 +166,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                     lhs.val.append(1)
             lhs.ind.append(E[(t,d)])
             lhs.val.append(-data.M)
-            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+            restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['L']*len(restriccion), rhs=[0]*len(restriccion))
 
     # Restriccion 6
+    restriccion = []
     for d in range(data.cantidad_dias):
         for t in range(data.cantidad_trabajadores):
             for h in range(data.cantidad_turnos):
@@ -169,9 +180,11 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                     lhs.val.append(1)
                 lhs.ind.append(F[(t,h,d)])
                 lhs.val.append(-1)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+                restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['G']*len(restriccion), rhs=[0]*len(restriccion))
 
     # Restriccion 7
+    restriccion = []
     for d in range(data.cantidad_dias):
         for t in range(data.cantidad_trabajadores):
             for h in range(data.cantidad_turnos):
@@ -181,19 +194,23 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                     lhs.val.append(1)
                 lhs.ind.append(F[(t,h,d)])
                 lhs.val.append(-data.M)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+                restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['L']*len(restriccion), rhs=[0]*len(restriccion))
 
     #----------------- RESTRICCIONES DEL PROBLEMA
     # Restriccion 1
+    restriccion = []
     for o in range(data.cantidad_ordenes):
         lhs = cplex.SparsePair()
         for d in range(data.cantidad_dias):
             for h in range(data.cantidad_turnos):
                 lhs.ind.append(Delta[(o, h, d)])
                 lhs.val.append(1)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[1])
+        restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['L']*len(restriccion), rhs=[1]*len(restriccion))
 
     # Restriccion 2
+    restriccion = []
     for t in range(data.cantidad_trabajadores):    
         for d in range(data.cantidad_dias):
             for h in range(data.cantidad_turnos):
@@ -201,26 +218,32 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                 for o in range(data.cantidad_ordenes):
                     lhs.ind.append(X[(t, o, h, d)])
                     lhs.val.append(1)
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[1])
+                restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['L']*len(restriccion), rhs=[1]*len(restriccion))
 
     # Restriccion 3
+    restriccion = []
     for t in range(data.cantidad_trabajadores):  
         lhs = cplex.SparsePair()  
         for d in range(data.cantidad_dias):
             lhs.ind.append(E[(t,d)])
             lhs.val.append(1)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[5])
+        restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['L']*len(restriccion), rhs=[5]*len(restriccion))
 
     # Restriccion 4
+    restriccion = []
     for t in range(data.cantidad_trabajadores):  
         for d in range(data.cantidad_dias):
             lhs = cplex.SparsePair()  
             for h in range(data.cantidad_turnos):
                 lhs.ind.append(F[(t,h,d)])
                 lhs.val.append(1)
-            my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[4])
+                restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['L']*len(restriccion), rhs=[4]*len(restriccion))
     
     # Restriccion 5
+    restriccion = []
     for (o1, o2) in data.ordenes_conflictivas:
         for h in range(data.cantidad_turnos):
             if h<4:
@@ -235,16 +258,22 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                         lhs.val.append(1)
                         lhs.ind.append(X[(t, o1, h+1, d)])
                         lhs.val.append(1)
-                        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[1])
+                        restriccion.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=restriccion, senses=['L']*len(restriccion), rhs=[1]*len(restriccion))
         
-    # Restriccion 6
+    # Restriccion 6 y 6b
+    restriccion_6   = []
+    restriccion_6_b = []
     for d in range(data.cantidad_dias):
         for h in range(data.cantidad_turnos):
             for o in range(data.cantidad_ordenes):
-                lhs = cplex.SparsePair() 
+                lhs   = cplex.SparsePair() 
+                lhs_b = cplex.SparsePair()
                 for t in range(data.cantidad_trabajadores):  
                     lhs.ind.append(X[(t, o, h, d)])
                     lhs.val.append(1)
+                    lhs_b.ind.append(X[(t, o, h, d)])
+                    lhs_b.val.append(1)
                 #Aplicamos distributiva a (1-delta)*M
                 lhs.ind.append('CONSTANT1_AUX')
                 lhs.val.append(data.M)
@@ -252,9 +281,16 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                 lhs.val.append(-data.M)
                 lhs.ind.append('CONSTANT2_AUX')
                 lhs.val.append(-data.ordenes[o].trabajadores_necesarios)#To
-                my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+                lhs_b.ind.append('CONSTANT2_AUX')
+                lhs_b.val.append(-data.ordenes[o].trabajadores_necesarios)
+                restriccion_6.append(lhs)
+                restriccion_6_b.append(lhs_b)
+    my_problem.linear_constraints.add(lin_expr=restriccion_6, senses=['G']*len(restriccion_6), rhs=[0]*len(restriccion_6))
+    my_problem.linear_constraints.add(lin_expr=restriccion_6_b, senses=['L']*len(restriccion_6_b), rhs=[0]*len(restriccion_6_b))
 
     # Restriccion 7
+    restriccion_lesser = []
+    restriccion_greater = []
     for (o1, o2) in data.ordenes_correlativas:
         lhs_lesser = cplex.SparsePair() 
         lhs_greater = cplex.SparsePair() 
@@ -269,11 +305,19 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
                     lhs_greater.val.append(1)
                     lhs_greater.ind.append(Delta[(o2, h+1, d)])
                     lhs_greater.val.append(-1)
-                    my_problem.linear_constraints.add(lin_expr=[lhs_lesser], senses=['L'], rhs=[0])
-                    my_problem.linear_constraints.add(lin_expr=[lhs_greater], senses=['G'], rhs=[0])
+                    restriccion_lesser.append(lhs_lesser)
+                    restriccion_greater.append(lhs_greater)
+    my_problem.linear_constraints.add(lin_expr=restriccion_lesser, senses=['L']*len(restriccion_lesser), rhs=[0]*len(restriccion_lesser))
+    my_problem.linear_constraints.add(lin_expr=restriccion_greater, senses=['G']*len(restriccion_greater), rhs=[0]*len(restriccion_greater))
 
     
     # Restriccion 8 y 9 
+    restriccion_max = []
+    restriccion_min = []
+    restriccion_zMAX = []
+    restriccion_zMAX_sum = []
+    restriccion_zMIN = []
+    restriccion_zMIN_sum = []
     for t in range(data.cantidad_trabajadores):  
         lhs_max = cplex.SparsePair()
         lhs_min = cplex.SparsePair()
@@ -288,11 +332,9 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
         lhs_max.val.append(-1)
         lhs_min.ind.append('MIN_ORDERS')
         lhs_min.val.append(-1)
-        my_problem.linear_constraints.add(lin_expr=[lhs_max], senses=['L'], rhs=[0])
-        my_problem.linear_constraints.add(lin_expr=[lhs_min], senses=['G'], rhs=[0])
-
-
-        
+        restriccion_min.append(lhs_min)
+        restriccion_max.append(lhs_max)
+          
         lhs = cplex.SparsePair()
         for o in range(data.cantidad_ordenes):
             for h in range(data.cantidad_turnos):
@@ -305,14 +347,16 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
         lhs.val.append(-data.M)
         lhs.ind.append('MAX_ORDERS')
         lhs.val.append(-1)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+        restriccion_zMAX.append(lhs)
+        
 
         
         lhs = cplex.SparsePair()
         lhs.ind.append(zMAX[t])
         lhs.val.append(1)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['E'], rhs=[1])
+        restriccion_zMAX_sum.append(lhs)
 
+    
         lhs = cplex.SparsePair()
         for o in range(data.cantidad_ordenes):
             for h in range(data.cantidad_turnos):
@@ -325,12 +369,20 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
         lhs.val.append(+data.M)
         lhs.ind.append('MIN_ORDERS')
         lhs.val.append(-1)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+        restriccion_zMIN.append(lhs)
 
         lhs = cplex.SparsePair()
         lhs.ind.append(zMIN[t])
         lhs.val.append(1)
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['E'], rhs=[1])
+        restriccion_zMIN_sum.append(lhs)
+
+    
+    my_problem.linear_constraints.add(lin_expr=restriccion_zMAX, senses=['G']*len(restriccion_zMAX), rhs=[0]*len(restriccion_zMAX))
+    my_problem.linear_constraints.add(lin_expr=restriccion_zMAX_sum, senses=['E']*len(restriccion_zMAX_sum), rhs=[1]*len(restriccion_zMAX_sum))
+    my_problem.linear_constraints.add(lin_expr=restriccion_zMIN, senses=['L']*len(restriccion_zMIN), rhs=[0]*len(restriccion_zMIN))
+    my_problem.linear_constraints.add(lin_expr=restriccion_zMIN_sum, senses=['E']*len(restriccion_zMIN_sum), rhs=[1]*len(restriccion_zMIN_sum))
+    my_problem.linear_constraints.add(lin_expr=restriccion_max, senses=['L']*len(restriccion_max), rhs=[0]*len(restriccion_max))
+    my_problem.linear_constraints.add(lin_expr=restriccion_min, senses=['G']*len(restriccion_min), rhs=[0]*len(restriccion_min))
 
     # Restriccion 10
     lhs = cplex.SparsePair()
@@ -350,36 +402,46 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
     
 
     #Restricciones función objetivo
+    wh1   = []
+    wh2_left   = []
+    wh2_right   = []
+    wh3_left   = []
+    wh3_right   = []
+    wh4   = []
+    s1_s2    = []
+    s2_s3    = []
+    link  = []
     for t in range(data.cantidad_trabajadores):
         #WH1
         lhs = cplex.SparsePair([S1[t],WH1[t]], [5.0,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+        wh1.append(lhs)
+        
 
         #WH2
         lhs = cplex.SparsePair([S2[t],WH2[t]], [5.0,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+        wh2_left.append(lhs)
 
         lhs = cplex.SparsePair([WH2[t],S1[t]], [1,-5.0])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+        wh2_right.append(lhs)
 
         #WH3
         lhs = cplex.SparsePair([S3[t],WH3[t]], [5.0,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+        wh3_left.append(lhs)
 
         lhs = cplex.SparsePair([WH3[t],S2[t]], [1,-5.0])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+        wh3_right.append(lhs)
 
         #WH4
         lhs = cplex.SparsePair([WH4[t],S3[t]], [1,-6.0])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+        wh4.append(lhs)
 
         #S1>=S2
         lhs = cplex.SparsePair([S1[t],S2[t]], [1,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+        s1_s2.append(lhs)
 
         #S2>=S3
         lhs = cplex.SparsePair([S2[t],S3[t]], [1,-1])
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+        s2_s3.append(lhs)
 
         #Link
         lhs = cplex.SparsePair()
@@ -395,8 +457,17 @@ def add_constraint_matrix(my_problem, data, A, X, E, F, Delta,
             for h in range(data.cantidad_turnos):
                 for d in range(data.cantidad_dias):
                     lhs.ind.append(X[(t, o, h, d)])
-                    lhs.val.append(-1)        
-        my_problem.linear_constraints.add(lin_expr=[lhs], senses=['G'], rhs=[0])
+                    lhs.val.append(-1)  
+        link.append(lhs)
+    my_problem.linear_constraints.add(lin_expr=[lhs], senses=['L'], rhs=[0])
+    my_problem.linear_constraints.add(lin_expr=wh2_left, senses=['L']*len(wh2_left), rhs=[0]*len(wh2_left))
+    my_problem.linear_constraints.add(lin_expr=wh2_right, senses=['L']*len(wh2_right), rhs=[0]*len(wh2_right))
+    my_problem.linear_constraints.add(lin_expr=wh3_left, senses=['L']*len(wh3_left), rhs=[0]*len(wh3_left))
+    my_problem.linear_constraints.add(lin_expr=wh3_right, senses=['L']*len(wh3_right), rhs=[0]*len(wh3_right))
+    my_problem.linear_constraints.add(lin_expr=wh4, senses=['L']*len(wh4), rhs=[0]*len(wh4))
+    my_problem.linear_constraints.add(lin_expr=s1_s2, senses=['G']*len(s1_s2), rhs=[0]*len(s1_s2))
+    my_problem.linear_constraints.add(lin_expr=s2_s3, senses=['G']*len(s2_s3), rhs=[0]*len(s2_s3))
+    my_problem.linear_constraints.add(lin_expr=link, senses=['G']*len(link), rhs=[0]*len(link))
 
         
 
