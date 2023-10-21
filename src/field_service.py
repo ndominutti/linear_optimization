@@ -1,6 +1,8 @@
 import sys
 import cplex
 import json
+import time
+
 
 TOLERANCE =10e-6 
 
@@ -643,8 +645,9 @@ def populate_by_row(my_problem, data):
 def solve_lp(my_problem, data):
     
     # Resolvemos el ILP.
-    
+    start_time = time.time()
     my_problem.solve()
+    end_time = time.time()
 
     # Obtenemos informacion de la solucion. Esto lo hacemos a traves de 'solution'. 
     x_variables = my_problem.solution.get_values()
@@ -657,6 +660,7 @@ def solve_lp(my_problem, data):
     print('Status solucion: ',status_string,'(' + str(status) + ')')
 
     status_json = {
+        'TIME':[round(end_time - start_time,2)],
         'A':{'VAR':[],'VAL':[]},
         'X':{'VAR':[],'VAL':[]},
         'D':{'VAR':[],'VAL':[]},
@@ -678,7 +682,7 @@ def solve_lp(my_problem, data):
                 status_json[variables_name[i][0]]['VAR'].append(variables_name[i])
                 status_json[variables_name[i][0]]['VAL'].append(x_variables[i])
     status_json['RESULT'] = objective_value
-    with open('status.json', 'w') as json_file:
+    with open(f'../data/output/status_{sys.argv[2].strip()}.json', 'w') as json_file:
         json.dump(status_json, json_file)
 
 def main():
@@ -688,9 +692,8 @@ def main():
     
     # Definimos el problema de cplex.
     prob_lp = cplex.Cplex()
-    # prob_lp.parameters.mip.strategy.nodeselect.set(1)
-    # prob_lp.parameters.mip.strategy.variableselect.set(1)
-    # prob_lp.parameters.mip.strategy.bbinterval.set(1)
+    nodeselect_strategy = {'df':0,'bb':1}
+    prob_lp.parameters.mip.strategy.nodeselect.set(nodeselect_strategy[sys.argv[3].strip()])
     
     # Armamos el modelo.
     populate_by_row(prob_lp,data)
@@ -700,4 +703,9 @@ def main():
 
 
 if __name__ == '__main__':
+    #Must give as arguments:
+    #1) data path
+    #2) problem name
+    #3) nodeselect strategy = df or bb
+    #EXAMPLE: python3 field_service.py ../data/new_week_1000.txt 1000_orders_df df
     main()
